@@ -1,0 +1,66 @@
+name: Deploy Lambda via Function URL
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FUNCTION_NAME: jwt-api-lambda
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Zip Lambda
+        run: zip -r function.zip handler.js app.js node_modules package.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy Lambda (Create or Update)
+        run: |
+          aws lambda get-function --function-name $FUNCTION_NAME \
+          && aws lambda update-function-code \
+              --function-name $FUNCTION_NAME \
+              --zip-file fileb://function.zip \
+          || aws lambda create-function \
+              --function-name $FUNCTION_NAME \
+              --runtime nodejs18.x \
+              --role arn:aws:iam::<YOUR_ACCOUNT_ID>:role/<LAMBDA_EXEC_ROLE> \
+              --handler handler.handler \
+              --zip-file fileb://function.zip \
+              --environment Variables="{JWT_SECRET=${{ secrets.JWT_SECRET }}}" \
+              --timeout 15 \
+              --memory-size 128
+
+      - name: Enable Lambda Function URL
+        run: |
+          aws lambda get-function-url-config --function-name $FUNCTION_NAME \
+          || aws lambda create-function-url-config \
+              --function-name $FUNCTION_NAME \
+              --auth-type NONE
+
+      - name: Output Function URL
+        run: |
+          aws lambda get-function-url-config \
+            --function-name $FUNCTION_NAME \
+            --query FunctionUrl \
+            --output text
