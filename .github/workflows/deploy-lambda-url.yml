@@ -15,7 +15,7 @@ jobs:
 
     env:
       FUNCTION_NAME: jwt-api-lambda
-      AWS_REGION: us-east-2
+      AWS_REGION: us-east-1
 
     steps:
       - name: Checkout
