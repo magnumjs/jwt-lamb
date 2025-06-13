@@ -67,8 +67,10 @@ jobs:
 
       - name: Add public invoke permission to Lambda Function URL
         run: |
+          set +e
+          POLICY=$(aws lambda get-policy --function-name $FUNCTION_NAME 2>/dev/null)
           set -e
-          if aws lambda get-policy --function-name $FUNCTION_NAME | grep -q '"Sid": "public-invoke"'; then
+          if echo "$POLICY" | grep -q '"Sid": "public-invoke"'; then
             echo "Permission with statement-id public-invoke already exists. Skipping."
           else
             aws lambda add-permission \
