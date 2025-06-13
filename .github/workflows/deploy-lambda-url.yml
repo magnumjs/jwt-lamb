@@ -51,7 +51,7 @@ jobs:
           || aws lambda create-function \
               --function-name $FUNCTION_NAME \
               --runtime nodejs18.x \
-              --role arn:aws:iam::<YOUR_ACCOUNT_ID>:role/<LAMBDA_EXEC_ROLE> \
+              --role ${{ secrets.AWS_ASSUME_ROLE }} \
               --handler handler.handler \
               --zip-file fileb://function.zip \
               --environment Variables="{JWT_SECRET=${{ secrets.JWT_SECRET }}}" \
