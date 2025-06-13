@@ -65,6 +65,15 @@ jobs:
               --function-name $FUNCTION_NAME \
               --auth-type NONE
 
+      - name: Add public invoke permission to Lambda Function URL
+        run: |
+          aws lambda add-permission \
+            --function-name $FUNCTION_NAME \
+            --action lambda:InvokeFunctionUrl \
+            --principal "*" \
+            --function-url-auth-type NONE \
+            --statement-id public-invoke
+
       - name: Output Function URL
         run: |
           aws lambda get-function-url-config \
