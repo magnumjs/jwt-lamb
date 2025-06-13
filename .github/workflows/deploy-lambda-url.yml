@@ -67,12 +67,17 @@ jobs:
 
       - name: Add public invoke permission to Lambda Function URL
         run: |
-          aws lambda add-permission \
-            --function-name $FUNCTION_NAME \
-            --action lambda:InvokeFunctionUrl \
-            --principal "*" \
-            --function-url-auth-type NONE \
-            --statement-id public-invoke
+          set -e
+          if aws lambda get-policy --function-name $FUNCTION_NAME | grep -q '"Sid": "public-invoke"'; then
+            echo "Permission with statement-id public-invoke already exists. Skipping."
+          else
+            aws lambda add-permission \
+              --function-name $FUNCTION_NAME \
+              --action lambda:InvokeFunctionUrl \
+              --principal "*" \
+              --function-url-auth-type NONE \
+              --statement-id public-invoke
+          fi
 
       - name: Output Function URL
         run: |
