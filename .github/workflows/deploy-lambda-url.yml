@@ -3,7 +3,7 @@ name: Deploy Lambda via Function URL
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   test:
