@@ -6,8 +6,12 @@ on:
       - main
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
   deploy:
     runs-on: ubuntu-latest
+    needs: test
 
     env:
       FUNCTION_NAME: jwt-api-lambda

@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+require('dotenv').config();
 
 const app = express();
 app.use(express.json());
@@ -32,5 +33,13 @@ app.get("/protected", authMiddleware, (req, res) => {
 app.get("/", (req, res) => {
   res.send("Hello from Express running on Lambda Function URL!");
 });
+
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
+}
+
 
 module.exports = app;
